@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  wasm:
+    cmds:
+      - cd ./cmd/wasm && GOOS=js GOARCH=wasm go build -o  ../../assets/json.wasm
+
+  server:
+    deps: [wasm]
+    cmds:
+      - cd ./cmd/server && go run main.go
+
+  raw:
+    cmds:
+      - cd ./cmd/raw && time go run main.go
