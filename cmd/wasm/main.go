@@ -2,17 +2,28 @@ package main
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"syscall/js"
 	"time"
 )
 
+var memo = make(map[int]int)
+
 func fibo(n int) int {
-	if n == 1 || n == 2 {
-		return 1
+	// Check if the result is already memoized
+	if val, ok := memo[n]; ok {
+		return val
 	}
 
-	return fibo(n-1) + fibo(n-2)
+	// Base cases
+	if n <= 1 {
+		memo[n] = n
+		return n
+	}
+
+	// Compute the Fibonacci number recursively
+	memo[n] = fibo(n-1) + fibo(n-2)
+
+	return memo[n]
 }
 
 func jsonWrapper() js.Func {
@@ -21,28 +32,24 @@ func jsonWrapper() js.Func {
 			return "Invalid no of arguments passed"
 		}
 
-		inputJSON := args[0].String()
+		n := args[0].Int()
 		start := time.Now()
 
-		log.WithFields(log.Fields{"start": start}).Info("A walrus appears")
-
-		value := fibo(40)
+		value := fibo(n)
 
 		end := time.Now()
 
-		log.WithFields(log.Fields{"end": end}).Info("A walrus appears")
-
-		log.WithFields(log.Fields{"take": end.Sub(start)}).Info("A walrus appears")
-
 		fmt.Println("value", value)
+		fmt.Println("take", end.Sub(start))
 
-		return inputJSON
+		return value
 	})
+
 	return jsonFunc
 }
 
 func main() {
 	fmt.Println("Go Web Assembly")
-	js.Global().Set("formatJSON", jsonWrapper())
+	js.Global().Set("fibo", jsonWrapper())
 	<-make(chan bool)
 }
