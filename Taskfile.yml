@@ -4,6 +4,7 @@ tasks:
   wasm:
     cmds:
       - cd ./cmd/wasm && GOOS=js GOARCH=wasm go build -o  ../../assets/json.wasm
+      # - cd ./cmd/wasm && tinygo build -target wasm -o ../../assets/json.wasm
 
   server:
     deps: [wasm]
